@@ -47,19 +47,21 @@ class Forecast(Resource):
             updatedData = getData()
             if updatedData is True:
                 updateDate(dateNow)
-                try:
-                    covid19_france_df = cleanDataToDF()
-                    data = forecastOneToStep(covid19_france_df)
-                    resultData = data.to_dict(orient='record')
-                    return {'success' : 'test','data' : resultData}, 200
-                except:
-                    return {'error' : 'could not forecast'}, 401 
+                # try:
+                covid19_france_df = cleanDataToDF()
+                cumulated, daily  = forecastOneToStep(covid19_france_df)
+                cumulated = cumulated.to_dict(orient='record')
+                daily = daily.to_dict(orient='record')
+                return {'success' : 'test','data' : {'cumulated':cumulated, 'daily':  daily}}, 200
+                # except:
+                #     return {'error' : 'could not forecast'}, 401 
         else:
             try:
                 covid19_france_df = cleanDataToDF()
-                data = forecastOneToStep(covid19_france_df)
-                resultData = data.to_dict(orient='record')
-                return {'success' : 'test','data' : resultData}, 200
+                cumulated, daily  = forecastOneToStep(covid19_france_df)
+                cumulated = cumulated.to_dict(orient='record')
+                daily = daily.to_dict(orient='record')
+                return {'success' : 'test','data' : {'cumulated':cumulated, 'daily':  daily}}, 200
             except:
                 return {'error' : 'could not forecast'}, 401 
 

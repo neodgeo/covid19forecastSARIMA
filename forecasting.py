@@ -14,10 +14,12 @@ def forecastOneToStep(covid19_france_df):
 
     dates = [pd.datetime.strptime(x, '%m/%d/%y') for x in list(covid19_france_df.columns[1:])]
     values = list((covid19_france_df.values)[0][1:])
+    values = np.sort(values)
+    values = values.tolist()
     serie_temporelle = pd.Series(values,index=dates)
     serie_temporelle.index.name = 'date'
 
-    meilleur_modele_SARIMAX = [(1,1,1),(2,1,0,12)]
+    meilleur_modele_SARIMAX = [(0,1,0),(1,1,0,12)]
 
 
     X = serie_temporelle.values
@@ -61,4 +63,14 @@ def forecastOneToStep(covid19_france_df):
     values.append(int(historique[-1]))
     df = pd.DataFrame(list(zip(dates,values)),columns=['date','values'])
     df['date'] = df['date'].astype(str)
-    return df
+
+    df_case = df.copy()
+    previous_val = ''
+    for index, val in enumerate(df_case['values']):
+        if index == 0:
+            previous_val = val
+            continue
+        case_val = val - previous_val
+        df_case['values'][index] = case_val
+        previous_val = val
+    return df, df_case
