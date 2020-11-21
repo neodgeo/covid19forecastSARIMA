@@ -27,6 +27,7 @@ api = Api(blueprint, doc='/documentation') #,doc=False
 app.register_blueprint(blueprint)
 
 app.config['SWAGGER_UI_JSONEDITOR'] = True
+app.config['RESTPLUS_JSON'] = {'indent': None, 'separators':(',',':')}
 
 a_doc = api.model('forecast',{})
 
@@ -41,27 +42,28 @@ def updateDate(date):
 class Forecast(Resource):
     @api.expect(a_doc)
     def post(self):
+        global lastUpdateDate
         print('inside get', lastUpdateDate)
         dateNow = str(datetime.datetime.now().day) + '/' + str(datetime.datetime.now().month)
         if (lastUpdateDate != dateNow):
             updatedData = getData()
             if updatedData is True:
                 updateDate(dateNow)
-                # try:
-                covid19_france_df = cleanDataToDF()
-                cumulated, daily  = forecastOneToStep(covid19_france_df)
-                cumulated = cumulated.to_dict(orient='record')
-                daily = daily.to_dict(orient='record')
-                return {'success' : 'test','data' : {'cumulated':cumulated, 'daily':  daily}}, 200
-                # except:
-                #     return {'error' : 'could not forecast'}, 401 
+                try:
+                    covid19_france_df = cleanDataToDF()
+                    cumulated, daily  = forecastOneToStep(covid19_france_df)
+                    cumulated = cumulated.to_dict(orient='record')
+                    daily = daily.to_dict(orient='record')
+                    return {'success' : 'test', 'data' : {'cumulated':cumulated, 'daily':  daily}}
+                except:
+                    return {'error' : 'could not forecast'}, 401 
         else:
             try:
                 covid19_france_df = cleanDataToDF()
                 cumulated, daily  = forecastOneToStep(covid19_france_df)
                 cumulated = cumulated.to_dict(orient='record')
                 daily = daily.to_dict(orient='record')
-                return {'success' : 'test','data' : {'cumulated':cumulated, 'daily':  daily}}, 200
+                return {'success' : 'test','data' : {'cumulated':cumulated, 'daily':  daily}}
             except:
                 return {'error' : 'could not forecast'}, 401 
 
